@@ -27,3 +27,20 @@ binToint xs = converteBin (inverter(xs)) 0
 
 menor [x] = x 
 menor (x:xs) = min x (menor xs)
+
+
+retirarElemento y (x:xs) = if x == y then xs else x:retirarElemento y xs  
+
+ordemCres [] = []
+ordemCres xs = x:ordemCres (retirarElemento x xs)
+	           where x = menor xs		   
+
+insereOrd x [] = [x]
+insereOrd x (y:ys) 
+				| pertence x (y:ys) = y:ys
+				| x < y = x:y:ys
+				| otherwise = y:(insereOrd x ys)
+
+paridade x 
+		| mod x 2 == 0 = True 
+		| otherwise = False	

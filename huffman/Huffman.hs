@@ -2,7 +2,7 @@ module Huffman where
 
 import Data.List
 
-data Huffman = Folha Char Int | No Int Huffman Huffman deriving (Show, Eq)
+data Huffman = Folha Char Int | No Int Huffman Huffman deriving (Show, Eq, Read)
 
 instance Ord Huffman where
     

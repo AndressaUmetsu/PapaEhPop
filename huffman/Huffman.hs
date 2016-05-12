@@ -5,15 +5,17 @@ import Data.List
 data Huffman = Folha Char Int | No Int Huffman Huffman deriving (Show, Eq)
 
 instance Ord Huffman where
-    compare (Folha _ x) (Folha _ y)
+    
+    compare huffman1 huffman2
         | x > y = GT
         | x < y = LT
         | otherwise = EQ
+            where
+                x = getFrequence huffman1
+                y = getFrequence huffman2
 
-    compare (Folha _ x) (No y _ _)
-        | x > y = GT
-        | x < y = LT
-        | otherwise = EQ 
+getFrequence (Folha _ x) = x
+getFrequence (No y _ _) = y
 
 compareTuples a b
     | snd a < snd b = LT
@@ -44,4 +46,20 @@ huffmanList xs = huffmanList_ tupleList
     where
         tupleList = frequenceList xs
 
---huffmanTree (leaf:leafList) 
+huffmanTree_ [singleElement] = [singleElement]
+huffmanTree_ (huffman1:huffman2:queue) = huffmanTree_ (insert newNode queue)
+    where
+        x = getFrequence huffman1
+        y = getFrequence huffman2
+        newNode = No (x+y) huffman1 huffman2
+
+huffmanTree xs = head huffList
+    where
+        huffList = huffmanTree_ (huffmanList xs)
+
+huffmanCodification_ freq leaf@(Folha c _) = [(c,freq)]
+huffmanCodification_ freq node@(No _ left right) = huffmanCodification_ (freq ++ "1") left++huffmanCodification_ (freq ++ "0") right 
+
+huffmanCodification xs = huffmanCodification_ "1" left++huffmanCodification_ "0" right
+    where
+        (No _ left right) = huffmanTree xs

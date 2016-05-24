@@ -22,15 +22,23 @@ compress xs = compress_ xs huffCodification
 
 putFreq [] = P.flush
 putFreq ((c,f) : xs) = do
-    P.putFreqWord8 (I.c2w c)
-    P.putFreqWord32be (toEnum f)
+    P.putWord8 (I.c2w c)
+    P.putWord32be (toEnum f)
     putFreq xs
 
---putAll xs = 
+putEncoded [] = P.flush
+putEncoded xs
+    | length xs > 8 = P.putWord8 (
+
+putAll xs = do
+    let freqList = frequenceList xs
+    let encodedWord = compress xs
+    P.putWord32be (toEnum (length freqList))
+    P.putWord32be (toEnum (length encodedWord))
+    putFreq freqList
+        
 
 main = do
     args <- getArgs
     file <- readFile (head args)
-    writeFile "huffmanTree.tree" (show$huffmanTree file)
-    writeFile (args !! 1) (compress file)
     return ()

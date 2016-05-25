@@ -3,6 +3,10 @@ import Data.Char
 import System.Environment
 import System.IO
 import System.IO.Error
+import qualified Data.Binary.Put as P
+import qualified Data.Binary.Get as G
+import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Internal as I
 
 expand tree = expand' tree
     where
@@ -13,6 +17,5 @@ expand tree = expand' tree
 main = do
     args <- getArgs
     file <- readFile (head args)
-    --let tree = read (args !! 1) :: Huffman
     writeFile (args !! 2) (expand (read (args !! 1) :: Huffman) file)
     return ()

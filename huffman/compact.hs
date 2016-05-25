@@ -26,9 +26,15 @@ putFreq ((c,f) : xs) = do
     P.putWord32be (toEnum f)
     putFreq xs
 
+make8 xs = take 8 (xs ++ repeat '0')
+
 putEncoded [] = P.flush
 putEncoded xs
-    | length xs > 8 = P.putWord8 (
+    | length xs > 8 = do 
+                        P.putWord8 (I.c2w $ chr $ bin2int (take 8 xs))
+                        putEncoded (drop 8 xs)
+    | otherwise = do
+                    P.putWord8 (I.c2w $ chr $ bin2int (make8 xs))
 
 putAll xs = do
     let freqList = frequenceList xs
@@ -36,9 +42,16 @@ putAll xs = do
     P.putWord32be (toEnum (length freqList))
     P.putWord32be (toEnum (length encodedWord))
     putFreq freqList
-        
+    putEncoded encodedWord
+
+bin2int xs = sum [w * b | (w,b) <- zip weights (reverse bits)]
+    where
+        weights = iterate (*2) 1 
+        bits = map digitToInt xs
 
 main = do
     args <- getArgs
     file <- readFile (head args)
+    let encoded = P.runPut (putAll file)
+    L.writeFile "Teste.bin" encoded
     return ()

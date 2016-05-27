@@ -8,6 +8,20 @@ import qualified Data.Binary.Get as G
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Internal as I
 
+getReg = do
+    c <- G.getWord8
+    f <- G.getWord32be
+    return (c,f)
+
+getRegs n = do
+    if n == 0 then return[]
+        else do {r <- getReg; rs <- getRegs (n-1); return(r:rs);}
+
+getAll = do
+    numOfCharacters <- G.getWord32be
+    wordLength <- G.getWord32be
+    let freqList = getRegs numOfCharacters
+
 expand tree = expand' tree
     where
         expand' (Folha a _) [] = [a]
@@ -17,5 +31,4 @@ expand tree = expand' tree
 main = do
     args <- getArgs
     file <- readFile (head args)
-    writeFile (args !! 2) (expand (read (args !! 1) :: Huffman) file)
     return ()

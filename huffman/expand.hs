@@ -17,17 +17,25 @@ getRegs n = do
     if n == 0 then return[]
         else do {r <- getReg; rs <- getRegs (n-1); return(r:rs);}
 
-getEncoded n
-    | n == 0 = ""
-    | n > 7 = int2bin $ ord $ I.w2c $ G.getWord8 ++ getEncoded (n-8)
-    | otherwise = take n $ int2bin $ ord $ I.w2c $ G.getWord8 
+{-convertEncodedWord _ [] = ""-}
+{-convertEncodedWord n (x:xs)-}
+    {-| n == 0 = ""-}
+    {-| n > 7 = int2bin $ ord $ I.w2c x ++ convertEncodedWord (n-8) xs-}
+    {-| otherwise = take n $ int2bin $ ord $ I.w2c x-}
+
+convertEncodedWord n xs = take n $ concat $ map (int2bin.ord.I.w2c) xs
+
+getEncoded = do
+    empty <- G.isEmpty
+    if empty then return[]
+        else do {r <- G.getWord8; rs <- getEncoded; return(r:rs);}
 
 getAll = do
     numOfCharacters <- G.getWord32be
     wordLength <- G.getWord32be
-    let freqList = getRegs numOfCharacters
-    let encodedWord = getEncoded wordLength
-    return((freqList,encodedWord))
+    freqList <- getRegs (fromIntegral numOfCharacters)
+    encodedWord <- getEncoded 
+    return((fromIntegral wordLength,freqList,encodedWord))
 
 expand tree = expand' tree
     where
@@ -39,11 +47,16 @@ int2bin x
     | x `div` 2 == 0 = show x
     | otherwise = int2bin (x `div` 2) ++ show (x `mod` 2) 
 
+convert [] = []
+convert ((c,f):xs) = (I.w2c c,fromIntegral f) : convert xs
+
 main = do
     args <- getArgs
     file <- L.readFile (head args)
     let 
-        (freqList,encodedWord) = G.runGet getAll file
+        (wordLength,freqList_,encodedWord_) = G.runGet getAll file
+        freqList = convert freqList_
+        encodedWord = convertEncodedWord wordLength encodedWord_
         leafList = huffmanList_ freqList
         tree = huffmanTree_ leafList
         expandedWord = expand (head tree) encodedWord

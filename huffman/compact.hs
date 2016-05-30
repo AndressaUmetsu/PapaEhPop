@@ -3,6 +3,8 @@ import Data.Char
 import System.Environment
 import System.IO
 import System.IO.Error
+import Data.List
+import Data.List.Split
 import qualified Data.Binary.Put as P
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Internal as I
@@ -57,11 +59,18 @@ bin2int xs = sum [w * b | (w,b) <- zip weights (reverse bits)]
         weights = iterate (*2) 1 
         bits = map digitToInt xs
 
+joinBlocks [] = ""
+joinBlocks (xs:xss) = xs ++ detToken ++ joinBlocks (xss)
+    where
+        detToken = if length xss /= 0 then ";" else ""
+
 main = do
     args <- getArgs
     file_ <- readFile (head args)
     let file = reverse (drop 1 (reverse file_))    
+    {-let file2 = splitOn "\n" file-}
     print file
+    {-let encoded = P.runPut (putAll (joinBlocks file2))-}
     let encoded = P.runPut (putAll file)
     L.writeFile "Teste.bin" encoded
     return ()

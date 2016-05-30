@@ -3,6 +3,8 @@ import Data.Char
 import System.Environment
 import System.IO
 import System.IO.Error
+import Data.List
+import Data.List.Split
 import qualified Data.Binary.Put as P
 import qualified Data.Binary.Get as G
 import qualified Data.ByteString.Lazy as L
@@ -77,6 +79,11 @@ printAll (c,n,lis,encoded) = do
     printRegs lis
     printEncoded encoded
 
+joinBlocksLn [] = ""
+joinBlocksLn (xs:xss) = xs ++ detToken ++ joinBlocksLn (xss)
+    where
+        detToken = if length xss /= 0 then "\n" else ""
+
 main = do
     args <- getArgs
     file <- L.readFile (head args)
@@ -89,5 +96,7 @@ main = do
         leafList = huffmanList_ freqList
         tree = huffmanTree_ leafList
         expandedWord = expand (head tree) encodedWord
+        {-expandedWordList = splitOn ";" expandedWord-}
+    {-writeFile "output.out" (joinBlocksLn expandedWordList)-}
     writeFile "output.out" expandedWord
     return ()

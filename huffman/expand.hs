@@ -25,17 +25,25 @@ getRegs n = do
 
 convertEncodedWord n xs = take n $ concat $ map (int2bin.ord.I.w2c) xs
 
+{-convertEncodedWord n xs = take n $ concat $ map (int2bin.fromIntegral) xs-}
+
 getEncoded = do
     empty <- G.isEmpty
     if empty then return[]
         else do {r <- G.getWord8; rs <- getEncoded; return(r:rs);}
 
+{-getEncoded = do-}
+    {-empty <- G.isEmpty-}
+    {-if empty then return[]-}
+        {-else do {r <- G.getWord32be; rs <- getEncoded; return(r:rs);}-}
+
+
 getAll = do
-    numOfCharacters <- G.getWord32be
-    wordLength <- G.getWord32be
+    numOfCharacters <- G.getWord8
+    wordLength <- G.getWord8
     freqList <- getRegs (fromIntegral numOfCharacters)
     encodedWord <- getEncoded 
-    return((fromIntegral wordLength,freqList,encodedWord))
+    return((numOfCharacters,wordLength,freqList,encodedWord))
 
 expand tree = expand' tree
     where
@@ -50,13 +58,34 @@ int2bin x
 convert [] = []
 convert ((c,f):xs) = (I.w2c c,fromIntegral f) : convert xs
 
+printRegs[] = return ()
+printRegs (x:xs) = do
+    printReg x
+    printRegs xs
+printReg (c,f) = putStrLn ((show(I.w2c c)) ++ "-" ++show f)
+
+printEncoded [] = return ()
+printEncoded (x:xs) = do
+    printChar x
+    printEncoded xs
+
+printChar x = putStr (int2bin $ ord $ I.w2c x)
+
+printAll (c,n,lis,encoded) = do
+    putStrLn (show $ ord $ I.w2c c)
+    putStrLn (show $ ord $ I.w2c n)
+    printRegs lis
+    printEncoded encoded
+
 main = do
     args <- getArgs
     file <- L.readFile (head args)
     let 
-        (wordLength,freqList_,encodedWord_) = G.runGet getAll file
+        (numOfCharacters,wordLength,freqList_,encodedWord_) = G.runGet getAll file
+    printAll (numOfCharacters,wordLength,freqList_,encodedWord_)
+    let
         freqList = convert freqList_
-        encodedWord = convertEncodedWord wordLength encodedWord_
+        encodedWord = convertEncodedWord (ord $ I.w2c wordLength) encodedWord_
         leafList = huffmanList_ freqList
         tree = huffmanTree_ leafList
         expandedWord = expand (head tree) encodedWord

@@ -30,17 +30,25 @@ make8 xs = take 8 (xs ++ repeat '0')
 
 putEncoded [] = P.flush
 putEncoded xs
-    | length xs > 8 = do 
+    | length xs > 8 = do
                         P.putWord8 (I.c2w $ chr $ bin2int (take 8 xs))
                         putEncoded (drop 8 xs)
     | otherwise = do
                     P.putWord8 (I.c2w $ chr $ bin2int (make8 xs))
 
+{-putEncoded [] = P.flush-}
+{-putEncoded xs-}
+    {-| length xs > 8 = do -}
+                        {-P.putWord32be (toEnum $ bin2int (take 8 xs))-}
+                        {-putEncoded (drop 8 xs)-}
+    {-| otherwise = do-}
+                    {-P.putWord32be (toEnum $ bin2int (make8 xs))-}
+
 putAll xs = do
     let freqList = frequenceList xs
     let encodedWord = compress xs
-    P.putWord32be (toEnum (length freqList))
-    P.putWord32be (toEnum (length encodedWord))
+    P.putWord8 (I.c2w $ chr $ length freqList)
+    P.putWord8 (I.c2w $ chr $ length encodedWord)
     putFreq freqList
     putEncoded encodedWord
 
@@ -51,7 +59,9 @@ bin2int xs = sum [w * b | (w,b) <- zip weights (reverse bits)]
 
 main = do
     args <- getArgs
-    file <- readFile (head args)
+    file_ <- readFile (head args)
+    let file = reverse (drop 1 (reverse file_))    
+    print file
     let encoded = P.runPut (putAll file)
     L.writeFile "Teste.bin" encoded
     return ()

@@ -22,37 +22,35 @@ expr = do v1 <- term
 		  e <- expr'
 		  return (ret v1 e )
 
--- O -> AO'    
-o = do v1 <- a    											  
+o = do v1 <- a -- O -> AO'
 	   e <- o'
 	   return (ret v1 e)
 
 -- Or
--- O' -> ||AO'     
-o' = do {char 'Or';
+o' = do {string "||"; -- O' -> ||AO'
 		 v1 <- a;
 		 e <- o';
-		 return (Just ((Or), ret v1 e))}	
-	 <|>
-	 do {char 
+		 return (Just ((Or), ret v1 e))}
+	 <|> return Nothing -- O' -> Vazio
+
+-- And
+a = do v1 <- n-- A -> NA'
+	   e <- a'
+	   return (ret v1 e)
+
+a' = do {string "&&"; -- A' -> &&NA'
+		 v1 <- n;
+		 e <- a';
+		 return (Just ((And), ret v1 e))}
+	 <|> return Nothing -- A' -> Vazio
 
 
+n = do { char '!'; --N -> not N
+		 v1 <- n;
+		 e <- -- ??
+		 return (Just((Not), ret v1 e))}
+	<|>	 return	fator  -- N -> F
 
-	}													
-
--- And 
--- A -> 
---a = 		  
-
-
--- N -> not N
- --n = do { char '~';     									
-		  --e <- n; 
-		    --
-	--
-	--}
-															-- N -> F	
- 
 fator = bool												-- F -> c
 		<|> do { char '('; e <- expr; char ')'; return e } 	-- F -> (E)
 

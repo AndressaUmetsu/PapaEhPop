@@ -75,6 +75,7 @@ eratosthenes :: [Int] -> [Int]
 eratosthenes []    = []
 eratosthenes (h:t) = h : (eratosthenes (filter (x -> mod x h /= 0) t))
 -- 17
+
 primes :: Int -> [Int]
 primes x = eratosthenes [2..x]
 
@@ -85,3 +86,6 @@ fib [] = fib (n-1) + fib (n-2)
 
 --19 
 -}
+
+
+

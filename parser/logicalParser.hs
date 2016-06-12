@@ -22,55 +22,72 @@ expr = do
 	e <- bimp'
 	return (ret v1 e )
 
-bimp' = do {string "<->"; -- B' -> <->IB'
+bimp' = do 
+	{
+		string "<->"; -- B' -> <->IB'
 		v1 <- imp;
 		e <- bimp';
-		return (Just (Bimp, ret v1 e))}
-	 <|> return Nothing -- B' -> Vazio
+		return (Just (Bimp, ret v1 e))
+	}
+	<|> return Nothing -- B' -> Vazio
 
 imp = do
-		v1 <- _or -- I -> AI'
-		e <- _or'
-		return (ret v1 e )
+	v1 <- _or -- I -> AI'
+	e <- _or'
+	return (ret v1 e )
 
-imp' = do {string "->"; -- I' -> ->AI'
-		v1 <- _and;
+imp' = do 
+	{
+		string "->"; -- I' -> ->AI'
+		v1 <- _or;
 		e <- imp';
-		return (Just (Imp, ret v1 e))}
-	 <|> return Nothing -- expr' -> Vazio
+		return (Just (Imp, ret v1 e))
+	}
+	<|> return Nothing -- expr' -> Vazio
 
 _or = do
 	v1 <- _and -- O -> AO'
 	e <- _or'
 	return (ret v1 e)
 
-_or' = do {string "||"; -- O' -> ||AO'
+_or' = do 
+	{
+		string "||"; -- O' -> ||AO'
 		v1 <- _and;
 		e <- _or';
-		return (Just (Or, ret v1 e))}
-	 <|> return Nothing -- O' -> Vazio
+		return (Just (Or, ret v1 e))
+	}
+	<|> return Nothing -- O' -> Vazio
 
 _and = do
 	v1 <- _not-- A -> NA'
 	e <- _and'
 	return (ret v1 e)
 
-_and' = do {string "&&"; -- A' -> &&NA'
+_and' = do 
+	{
+		string "&&"; -- A' -> &&NA'
 		v1 <- _not;
 		e <- _and';
-		return (Just (And, ret v1 e))}
-	 <|> return Nothing -- A' -> Vazio
+		return (Just (And, ret v1 e))
+	}
+	<|> return Nothing -- A' -> Vazio
 
 --Not
---_not = do { char '!'; --N -> _not N
---		 e <- _not -- ??
---		 return (Just((Not), ret  e))}
---	<|>	 return	fator  -- N -> F
+--_not = do 
+--	{ 
+--		 char '!'; --N -> _not N
+--		e <- _not -- ??
+--		return (Just((Not), ret  e))}
+--	<|>	return	fator  -- N -> F
 
 _not = return fator
 
-fator = bool 												-- F -> c
-		<|> do { char '('; e <- expr; char ')'; return e } 	-- F -> (E)
+fator = do 
+	{ 
+		char '('; e <- expr; char ')'; return e  -- F -> (E)
+	} 	
+	<|> bool -- F -> c												
 
 bool = do
 	literal <- many1 letter

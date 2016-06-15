@@ -34,7 +34,7 @@ bimp' = do
 
 imp = do
 	v1 <- _or -- I -> AI'
-	e <- _or'
+	e <- imp'
 	return (ret v1 e )
 
 imp' = do
@@ -61,7 +61,7 @@ _or' = do
 	<|> return Nothing -- O' -> Vazio
 
 _and = do
-	v1 <- fator-- A -> NA'
+	v1 <- _not-- A -> NA'
 	e <- _and'
 	return (ret v1 e)
 
@@ -77,7 +77,7 @@ _and' = do
 _not = do
 	{
 		char '!'; --N -> !E
-		e <- expr;
+		e <- fator;
 		return (Not e)
 	}
 	<|>	do
@@ -101,7 +101,6 @@ bool = do
 
 
 
---avaliarTab (Not e1) = not (avali
 --avaliarTab (_And e1 e2) = avaliarTab e1 && avaliarTab e2
 --avaliarTab (Var v) = consultarValor tab v
 

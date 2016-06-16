@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 import Text.ParserCombinators.Parsec
 import Data.Char
 
@@ -22,12 +23,12 @@ expr = do
 	e <- bimp'
 	return (ret v1 e )
 
-bimp' = do 
+bimp' = do
 	{
 		string "<->"; -- B' -> <->IB'
 		v1 <- imp;
 		e <- bimp';
-		return (Just (Bimp, ret v1 e))
+		return (Just((Bimp), ret v1 e))
 	}
 	<|> return Nothing -- B' -> Vazio
 
@@ -36,12 +37,12 @@ imp = do
 	e <- _or'
 	return (ret v1 e )
 
-imp' = do 
+imp' = do
 	{
 		string "->"; -- I' -> ->AI'
 		v1 <- _or;
 		e <- imp';
-		return (Just (Imp, ret v1 e))
+		return (Just ((Imp), ret v1 e))
 	}
 	<|> return Nothing -- expr' -> Vazio
 
@@ -50,48 +51,53 @@ _or = do
 	e <- _or'
 	return (ret v1 e)
 
-_or' = do 
+_or' = do
 	{
 		string "||"; -- O' -> ||AO'
 		v1 <- _and;
 		e <- _or';
-		return (Just (Or, ret v1 e))
+		return (Just ((Or), ret v1 e))
 	}
 	<|> return Nothing -- O' -> Vazio
 
 _and = do
-	v1 <- _not-- A -> NA'
+	v1 <- fator-- A -> NA'
 	e <- _and'
 	return (ret v1 e)
 
-_and' = do 
+_and' = do
 	{
 		string "&&"; -- A' -> &&NA'
 		v1 <- _not;
 		e <- _and';
-		return (Just (And, ret v1 e))
+		return (Just ((And), ret v1 e))
 	}
 	<|> return Nothing -- A' -> Vazio
 
---Not
---_not = do 
---	{ 
---		 char '!'; --N -> _not N
---		e <- _not -- ??
---		return (Just((Not), ret  e))}
---	<|>	return	fator  -- N -> F
+_not = do
+	{
+		char '!'; --N -> !E
+		e <- expr;
+		return (Not e)
+	}
+	<|>	do
+	{
+		e <- fator; -- N -> F
+		return e
+	}
 
-_not = return fator
 
-fator = do 
-	{ 
-		char '('; e <- expr; char ')'; return e  -- F -> (E)
-	} 	
-	<|> bool -- F -> c												
+fator = bool -- F -> c
+		  <|> do
+		  {
+			char '('; e <- expr; char ')'; return (e)  -- F -> (E)
+		  }
+
 
 bool = do
-	literal <- many1 letter
-	return literal
+	x <- letter
+	xs <- many (digit<|>letter)
+	return (Var ([x]++xs))
 
 
 

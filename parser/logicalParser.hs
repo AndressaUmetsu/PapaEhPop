@@ -1,15 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 import Text.ParserCombinators.Parsec
 import Data.Char
+import ExprEvaluation
 
-data Expr = Bimp Expr Expr | Imp Expr Expr | Or Expr Expr | And Expr Expr | Not Expr | Var String deriving Show
+--data Expr = Bimp Expr Expr | Imp Expr Expr | Or Expr Expr | And Expr Expr | Not Expr | Var String deriving Show
 
 main = do
     putStr "\nExpressao:"
     e <- getLine
     case avaliarExpr e of
         Left err -> putStr ((show err)++ "\n")
-        Right r  -> putStr ((show r) ++ "\n")
+        Right r  -> putStr ((show r) ++ "\n" ++ show (forceEvaluation r) ++ "\n")
     return()
 
 

@@ -1,3 +1,5 @@
+module ExprEvaluation where
+
 import Data.Char
 
 data Expr = Bimp Expr Expr | Imp Expr Expr | Or Expr Expr | And Expr Expr | Not Expr | Var String deriving Show
@@ -20,17 +22,22 @@ checkValue (entry:tab) v
     | fst entry == v = snd entry
     | otherwise = checkValue tab v
 
-countVariables (Not e1) = countVariables e1
+removeDups [] = []
+removeDups (x:xs) = x : removeDups (filter (/=x) xs)
 
-countVariables (And e1 e2)  = countVariables e1 ++ countVariables e2
+countVariables expr = removeDups (countVariables' expr)
 
-countVariables (Or e1 e2)   = countVariables e1 ++ countVariables e2
+countVariables' (Not e1) = countVariables' e1
 
-countVariables (Imp e1 e2)  = countVariables e1 ++ countVariables e2
+countVariables' (And e1 e2)  = countVariables' e1 ++ countVariables' e2
 
-countVariables (Bimp e1 e2) = countVariables e1 ++ countVariables e2
+countVariables' (Or e1 e2)   = countVariables' e1 ++ countVariables' e2
 
-countVariables (Var v) = [v]
+countVariables' (Imp e1 e2)  = countVariables' e1 ++ countVariables' e2
+
+countVariables' (Bimp e1 e2) = countVariables' e1 ++ countVariables' e2
+
+countVariables' (Var v) = [v]
 
 generateTab' [] _ = []
 generateTab' (v:varList) (b:bitString)

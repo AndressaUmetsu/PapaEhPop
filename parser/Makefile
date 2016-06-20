@@ -1,14 +1,11 @@
 #HSFLAGS=-prof -fforce-recomp -auto-all -caf-all --make -O2
-HSFLAGS=-w
+HSFLAGS=-w -XFlexibleContexts
 .PHONY:clean
 
-all: compact expand
+all: compact
 
 compact:
-	ghc compact 	$(HSFLAGS) 
-
-expand:
-	ghc expand      $(HSFLAGS)
+	ghc logicalParser 	$(HSFLAGS) 
 
 clean:
 	-@rm -v *.o *.hi 2> /dev/null || true
